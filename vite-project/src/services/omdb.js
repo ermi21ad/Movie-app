@@ -1,18 +1,26 @@
-const API_KEY = '98da00e2'; // Directly using your API key now
+const API_KEY = '98da00e2';
 const BASE_URL = 'http://www.omdbapi.com/';
 
-export const searchMovies = async (query, page = 1, type = '', year = '') => {
+export const searchMovies = async (query, { type = '', year = '', rating = '' } = {}) => {
   try {
     const response = await fetch(
-      `${BASE_URL}?apikey=${API_KEY}&s=${query}&page=${page}${
+      `${BASE_URL}?apikey=${API_KEY}&s=${query}${
         type ? `&type=${type}` : ''
       }${year ? `&y=${year}` : ''}`
     );
     const data = await response.json();
     
     if (data.Response === 'True') {
+      // Filter by rating if specified
+      let movies = data.Search || [];
+      if (rating) {
+        movies = movies.filter(movie => 
+          movie.imdbRating && parseFloat(movie.imdbRating) >= parseFloat(rating)
+        );
+      }
+      
       return {
-        movies: data.Search,
+        movies,
         totalResults: parseInt(data.totalResults),
       };
     } else {
@@ -24,10 +32,10 @@ export const searchMovies = async (query, page = 1, type = '', year = '') => {
   }
 };
 
-export const getMovieById = async (id, plot = 'short') => {
+export const getMovieById = async (id) => {
   try {
     const response = await fetch(
-      `${BASE_URL}?apikey=${API_KEY}&i=${id}&plot=${plot}`
+      `${BASE_URL}?apikey=${API_KEY}&i=${id}&plot=full`
     );
     const data = await response.json();
     
@@ -38,26 +46,6 @@ export const getMovieById = async (id, plot = 'short') => {
     }
   } catch (error) {
     console.error('Error fetching movie by ID:', error);
-    throw error;
-  }
-};
-
-export const getMovieByTitle = async (title, type = '', year = '', plot = 'short') => {
-  try {
-    const response = await fetch(
-      `${BASE_URL}?apikey=${API_KEY}&t=${encodeURIComponent(title)}${
-        type ? `&type=${type}` : ''
-      }${year ? `&y=${year}` : ''}&plot=${plot}`
-    );
-    const data = await response.json();
-    
-    if (data.Response === 'True') {
-      return data;
-    } else {
-      throw new Error(data.Error || 'Unknown error occurred');
-    }
-  } catch (error) {
-    console.error('Error fetching movie by title:', error);
     throw error;
   }
 };

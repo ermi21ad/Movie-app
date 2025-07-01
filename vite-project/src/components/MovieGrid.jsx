@@ -14,12 +14,13 @@ const MovieGrid = ({ movies, onMovieClick }) => {
     <Grid container spacing={4}>
       {movies.map((movie) => (
         <Grid item key={movie.imdbID} xs={12} sm={6} md={4} lg={3}>
-          <div 
-            onClick={() => onMovieClick(movie.imdbID)}
-            style={{ cursor: 'pointer', height: '100%' }}
-          >
-            <MovieCard movie={movie} />
-          </div>
+          <MovieCard 
+            movie={movie}
+            onClick={() => {
+              console.log('Movie clicked:', movie.imdbID); // Debug log
+              onMovieClick(movie.imdbID);
+            }}
+          />
         </Grid>
       ))}
     </Grid>
